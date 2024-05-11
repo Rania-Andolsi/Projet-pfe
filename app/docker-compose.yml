@@ -1,0 +1,37 @@
+version: '3.1'
+services:
+    web:
+      image: odoo:17.0
+      restart: always
+      depends_on:
+        - db
+      volumes:
+        - odoo-web-data:/var/lib/odoo
+        - ./config:/etc/odoo
+        - ./addons:/mtn/extra-addons
+      environment:
+        - PASSWORD_FILE=/run/secrets/odoo_secret
+      ports:
+        - '8069:8069'
+      secrets:
+        - odoo_secret
+    db:
+      image: postgres:15
+      restart: always
+      volumes:
+        - odoo-db-data:/var/lib/postgresql/data/pgdata
+      environment:
+        - POSTGRES_USER=odoo
+        - POSTGRES_DB=postgres
+        - POSTGRES_PASSWORD_FILE=/run/secrets/odoo_secret
+        - PGDATA=/var/lib/postgres/data/pgdata
+      secrets:
+        - odoo_secret
+
+volumes:
+  odoo-web-data:
+  odoo-db-data:
+
+secrets:
+  odoo_secret:
+    file: odoo_pass
